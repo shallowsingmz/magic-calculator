@@ -1,141 +1,87 @@
-# 🚀 Welcome to Z.ai Code Scaffold
+# 小米风格魔术计算器
 
-A modern, production-ready web application scaffold powered by cutting-edge technologies, designed to accelerate your development with [Z.ai](https://chat.z.ai)'s AI-powered coding assistance.
-
-## ✨ Technology Stack
-
-This scaffold provides a robust foundation built with:
-
-### 🎯 Core Framework
-- **⚡ Next.js 16** - The React framework for production with App Router
-- **📘 TypeScript 5** - Type-safe JavaScript for better developer experience
-- **🎨 Tailwind CSS 4** - Utility-first CSS framework for rapid UI development
-
-### 🧩 UI Components & Styling
-- **🧩 shadcn/ui** - High-quality, accessible components built on Radix UI
-- **🎯 Lucide React** - Beautiful & consistent icon library
-- **🌈 Framer Motion** - Production-ready motion library for React
-- **🎨 Next Themes** - Perfect dark mode in 2 lines of code
-
-### 📋 Forms & Validation
-- **🎣 React Hook Form** - Performant forms with easy validation
-- **✅ Zod** - TypeScript-first schema validation
-
-### 🔄 State Management & Data Fetching
-- **🐻 Zustand** - Simple, scalable state management
-- **🔄 TanStack Query** - Powerful data synchronization for React
-- **🌐 Fetch** - Promise-based HTTP request
-
-### 🗄️ Database & Backend
-- **🗄️ Prisma** - Next-generation TypeScript ORM
-- **🔐 NextAuth.js** - Complete open-source authentication solution
-
-### 🎨 Advanced UI Features
-- **📊 TanStack Table** - Headless UI for building tables and datagrids
-- **🖱️ DND Kit** - Modern drag and drop toolkit for React
-- **📊 Recharts** - Redefined chart library built with React and D3
-- **🖼️ Sharp** - High performance image processing
-
-### 🌍 Internationalization & Utilities
-- **🌍 Next Intl** - Internationalization library for Next.js
-- **📅 Date-fns** - Modern JavaScript date utility library
-- **🪝 ReactUse** - Collection of essential React hooks for modern development
-
-## 🎯 Why This Scaffold?
-
-- **🏎️ Fast Development** - Pre-configured tooling and best practices
-- **🎨 Beautiful UI** - Complete shadcn/ui component library with advanced interactions
-- **🔒 Type Safety** - Full TypeScript configuration with Zod validation
-- **📱 Responsive** - Mobile-first design principles with smooth animations
-- **🗄️ Database Ready** - Prisma ORM configured for rapid backend development
-- **🔐 Auth Included** - NextAuth.js for secure authentication flows
-- **📊 Data Visualization** - Charts, tables, and drag-and-drop functionality
-- **🌍 i18n Ready** - Multi-language support with Next Intl
-- **🚀 Production Ready** - Optimized build and deployment settings
-- **🤖 AI-Friendly** - Structured codebase perfect for AI assistance
-
-## 🚀 Quick Start
-
-```bash
-# Install dependencies
-bun install
-
-# Start development server
-bun run dev
-
-# Build for production
-bun run build
-
-# Start production server
-bun start
-```
-
-Open [http://localhost:3000](http://localhost:3000) to see your application running.
-
-## 🤖 Powered by Z.ai
-
-This scaffold is optimized for use with [Z.ai](https://chat.z.ai) - your AI assistant for:
-
-- **💻 Code Generation** - Generate components, pages, and features instantly
-- **🎨 UI Development** - Create beautiful interfaces with AI assistance  
-- **🔧 Bug Fixing** - Identify and resolve issues with intelligent suggestions
-- **📝 Documentation** - Auto-generate comprehensive documentation
-- **🚀 Optimization** - Performance improvements and best practices
-
-Ready to build something amazing? Start chatting with Z.ai at [chat.z.ai](https://chat.z.ai) and experience the future of AI-powered development!
-
-## 📁 Project Structure
-
-```
-src/
-├── app/                 # Next.js App Router pages
-├── components/          # Reusable React components
-│   └── ui/             # shadcn/ui components
-├── hooks/              # Custom React hooks
-└── lib/                # Utility functions and configurations
-```
-
-## 🎨 Available Features & Components
-
-This scaffold includes a comprehensive set of modern web development tools:
-
-### 🧩 UI Components (shadcn/ui)
-- **Layout**: Card, Separator, Aspect Ratio, Resizable Panels
-- **Forms**: Input, Textarea, Select, Checkbox, Radio Group, Switch
-- **Feedback**: Alert, Toast (Sonner), Progress, Skeleton
-- **Navigation**: Breadcrumb, Menubar, Navigation Menu, Pagination
-- **Overlay**: Dialog, Sheet, Popover, Tooltip, Hover Card
-- **Data Display**: Badge, Avatar, Calendar
-
-### 📊 Advanced Data Features
-- **Tables**: Powerful data tables with sorting, filtering, pagination (TanStack Table)
-- **Charts**: Beautiful visualizations with Recharts
-- **Forms**: Type-safe forms with React Hook Form + Zod validation
-
-### 🎨 Interactive Features
-- **Animations**: Smooth micro-interactions with Framer Motion
-- **Drag & Drop**: Modern drag-and-drop functionality with DND Kit
-- **Theme Switching**: Built-in dark/light mode support
-
-### 🔐 Backend Integration
-- **Authentication**: Ready-to-use auth flows with NextAuth.js
-- **Database**: Type-safe database operations with Prisma
-- **API Client**: HTTP requests with Fetch + TanStack Query
-- **State Management**: Simple and scalable with Zustand
-
-### 🌍 Production Features
-- **Internationalization**: Multi-language support with Next Intl
-- **Image Optimization**: Automatic image processing with Sharp
-- **Type Safety**: End-to-end TypeScript with Zod validation
-- **Essential Hooks**: 100+ useful React hooks with ReactUse for common patterns
-
-## 🤝 Get Started with Z.ai
-
-1. **Clone this scaffold** to jumpstart your project
-2. **Visit [chat.z.ai](https://chat.z.ai)** to access your AI coding assistant
-3. **Start building** with intelligent code generation and assistance
-4. **Deploy with confidence** using the production-ready setup
+## 项目简介
+本项目是一款复刻小米手机原生计算器UI、内置自定义魔术数字逻辑的纯前端网页计算器。零第三方依赖、开箱即用，既保留了标准计算器的完整计算能力，又实现了隐蔽流畅的魔术数字展示效果，可用于趣味互动、数字预言等场景。
 
 ---
 
-Built with ❤️ for the developer community. Supercharged by [Z.ai](https://chat.z.ai) 🚀
+## ✨ 功能特性
+### 标准计算器功能
+- 完整支持加减乘除四则运算，计算逻辑与原生计算器完全一致
+- 配套小数点、正负号切换、单字符回退删除、全清屏(AC)等辅助功能
+- 1:1复刻小米原生计算器的视觉布局、按键样式与交互手感
+- 全端自适应，完美兼容手机、平板、电脑等各类设备的现代浏览器
+
+### 核心魔术功能
+- 基于四阶段状态机实现，魔术逻辑与正常计算完全隔离，不影响基础功能使用
+- 后台自动基于操作时刻的系统时间，生成固定规则的7位魔术数字
+- 触发流程隐蔽无感知，魔术展示效果可控，逐位显示增强互动感
+- 一键重置机制，可快速恢复正常计算模式，重复使用无限制
+
+---
+
+## 🎮 魔术玩法完整教程
+### 核心原理
+通过预设操作序列，让计算器最终显示基于操作时刻生成的时间数字，实现「数字预言」的魔术效果。全程后台运算无感知，界面无任何异常提示。
+
+### 操作步骤
+1.  **阶段一：正常计算模式（初始状态）**
+    - 打开计算器，正常输入任意算式（例如 `123×456`、`888+666`）
+    - 点击 `=` 等号键得到计算结果，此时计算器自动进入魔术待设定状态
+
+2.  **阶段二：魔术后台设定**
+    - 点击 `AC` 清屏键，界面正常清空，用户视角无任何异常
+    - 后台自动执行逻辑：获取当前系统时间，按规则生成7位数字，计算该数字与上一步计算结果的差值并静默存储，全程无界面提示
+    - 执行完成后，自动进入魔术展示状态
+
+3.  **阶段三：魔术数字展示**
+    - 点击网页**任意位置（AC键除外）**，每点击1次，输出区会从高位到低位显示差值的1位数字
+    - 连续点击，直到完整的差值数字全部显示完毕，自动进入锁定状态
+
+4.  **阶段四：锁定与重置**
+    - 锁定状态：点击页面任意非AC区域，界面无任何响应，避免误触打乱魔术效果
+    - 重置操作：点击 `AC` 键，即可清空所有内部状态，计算器恢复正常计算模式，可重新开启新一轮魔术流程
+
+---
+
+## 🚀 快速使用
+1.  复制项目完整代码，新建空白文件并命名为 `magic-calculator.html`
+2.  用任意现代浏览器（Chrome、Edge、Safari、Firefox等）打开该文件
+3.  无需安装任何依赖、无需配置服务器环境，打开即可使用
+
+---
+
+## 📌 核心规则说明
+### 魔术数字生成规则
+- 固定7位数字格式：`1位月份 + 2位日期 + 2位小时 + 2位分钟`
+- 月份不补零（例：2月为`2`，而非`02`），日期、小时、分钟均补零至2位
+- 示例：3月8日09:05 → 拼接为 `3080905`，严格保证固定7位数
+
+### 状态机流转规则
+| 阶段 | 状态名称 | 核心触发条件 | 核心行为 |
+|------|----------|--------------|----------|
+| 1 | 正常计算模式 | 初始状态/重置完成后 | 所有计算功能完全正常，首次点击`=`后进入阶段2 |
+| 2 | 魔术设定模式 | 阶段1完成后，首次点击`AC` | 界面正常清屏，后台生成魔术数字与差值，完成后进入阶段3 |
+| 3 | 魔术展示模式 | 阶段2完成后，点击页面非AC区域 | 逐位显示差值数字，全部位数显示完成后进入阶段4 |
+| 4 | 锁定重置模式 | 差值数字全部显示完成 | 非AC区域点击无响应，点击`AC`后重置回阶段1 |
+
+---
+
+## 🔧 技术栈
+- **HTML5**：页面基础结构搭建
+- **CSS3**：UI样式还原、响应式布局、交互动效实现
+- **原生JavaScript**：计算逻辑实现、魔术状态机控制、全局事件监听，无任何第三方框架/依赖
+
+---
+
+## ⚠️ 注意事项
+1.  魔术数字生成依赖设备系统时间，请确保操作时设备时间设置正确
+2.  暂不处理「时间数字小于阶段一计算结果」导致差值为负数的情况，建议阶段一的计算结果小于7位数最大值（9999999）
+3.  核心点击事件已做冒泡隔离处理，请勿随意修改页面核心DOM结构，避免魔术逻辑失效
+4.  兼容所有主流现代浏览器，不支持IE等老旧浏览器
+5.  本项目仅用于学习与娱乐用途，请勿用于非法场景
+
+---
+
+## 📄 开源说明
+本项目为开源学习项目，可自由修改、分发、个人使用，无商业使用限制。

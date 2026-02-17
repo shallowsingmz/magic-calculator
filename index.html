@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小米风格魔术计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f5f5f5;
+            padding: 20px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .calculator {
+            background-color: #f0f0f0;
+            border-radius: 28px;
+            padding: 30px 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .display {
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-end;
+            font-size: 56px;
+            font-weight: 300;
+            color: #1a1a1a;
+            margin-bottom: 24px;
+            padding: 0 10px;
+            word-break: break-all;
+            overflow-wrap: break-word;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .btn {
+            height: 75px;
+            border-radius: 50%;
+            border: none;
+            font-size: 28px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            opacity: 0.7;
+        }
+
+        .num-btn {
+            background-color: #ffffff;
+            color: #1a1a1a;
+        }
+
+        .func-btn {
+            background-color: #e0e0e0;
+            color: #1a1a1a;
+        }
+
+        .op-btn {
+            background-color: #ff9500;
+            color: #ffffff;
+            font-size: 32px;
+        }
+
+        .zero-btn {
+            grid-column: span 2;
+            border-radius: 37.5px;
+            text-align: left;
+            padding-left: 30px;
+        }
+
+        @media (max-width: 400px) {
+            .calculator {
+                padding: 20px 15px;
+            }
+            .display {
+                font-size: 48px;
+                height: 100px;
+            }
+            .btn {
+                height: 65px;
+                font-size: 24px;
+            }
+            .zero-btn {
+                border-radius: 32.5px;
+                padding-left: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <!-- 第一行功能键 -->
+            <button class="btn func-btn" id="clear-btn" onclick="clearAll()">AC</button>
+            <button class="btn func-btn" onclick="backspace()">⌫</button>
+            <button class="btn func-btn" onclick="toggleSign()">+/-</button>
+            <button class="btn op-btn" onclick="setOperator('÷')">÷</button>
+            
+            <!-- 第二行数字键 -->
+            <button class="btn num-btn" onclick="appendNumber(7)">7</button>
+            <button class="btn num-btn" onclick="appendNumber(8)">8</button>
+            <button class="btn num-btn" onclick="appendNumber(9)">9</button>
+            <button class="btn op-btn" onclick="setOperator('×')">×</button>
+            
+            <!-- 第三行数字键 -->
+            <button class="btn num-btn" onclick="appendNumber(4)">4</button>
+            <button class="btn num-btn" onclick="appendNumber(5)">5</button>
+            <button class="btn num-btn" onclick="appendNumber(6)">6</button>
+            <button class="btn op-btn" onclick="setOperator('-')">-</button>
+            
+            <!-- 第四行数字键 -->
+            <button class="btn num-btn" onclick="appendNumber(1)">1</button>
+            <button class="btn num-btn" onclick="appendNumber(2)">2</button>
+            <button class="btn num-btn" onclick="appendNumber(3)">3</button>
+            <button class="btn op-btn" onclick="setOperator('+')">+</button>
+            
+            <!-- 第五行底部键 -->
+            <button class="btn num-btn zero-btn" onclick="appendNumber(0)">0</button>
+            <button class="btn num-btn" onclick="appendDecimal()">.</button>
+            <button class="btn op-btn" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        // 计算器核心状态
+        let currentInput = '0';
+        let previousInput = '';
+        let operator = null;
+        let calculated = false;
+
+        // 魔术逻辑状态机
+        let currentStage = 1; // 1-正常计算 2-魔术待设定 3-魔术展示 4-锁定重置
+        let stage1Result = 0;
+        let magicDiff = 0;
+        let currentDigitIndex = 0;
+
+        // 更新显示区域
+        function updateDisplay() {
+            const displayElement = document.getElementById('display');
+            displayElement.textContent = currentInput;
+        }
+
+        // 数字输入处理
+        function appendNumber(num) {
+            if (currentStage === 3 || currentStage === 4) return;
+            if (calculated) {
+                currentInput = String(num);
+                calculated = false;
+            } else {
+                currentInput = currentInput === '0' ? String(num) : currentInput + num;
+            }
+            updateDisplay();
+        }
+
+        // 小数点处理
+        function appendDecimal() {
+            if (currentStage === 3 || currentStage === 4) return;
+            if (calculated) {
+                currentInput = '0.';
+                calculated = false;
+                updateDisplay();
+                return;
+            }
+            if (!currentInput.includes('.')) {
+                currentInput += '.';
+                updateDisplay();
+            }
+        }
+
+        // 运算符设置
+        function setOperator(op) {
+            if (currentStage === 3 || currentStage === 4) return;
+            if (calculated) {
+                calculated = false;
+            }
+            if (operator !== null && previousInput !== '') {
+                calculate();
+            }
+            operator = op;
+            previousInput = currentInput;
+            currentInput = '0';
+            updateDisplay();
+        }
+
+        // 计算结果
+        function calculate() {
+            if (currentStage === 3 || currentStage === 4) return;
+            if (operator === null || previousInput === '') return;
+            
+            const prev = parseFloat(previousInput);
+            const current = parseFloat(currentInput);
+            let result;
+
+            switch (operator) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '×':
+                    result = prev * current;
+                    break;
+                case '÷':
+                    result = current === 0 ? '错误' : prev / current;
+                    break;
+                default:
+                    return;
+            }
+
+            // 处理计算结果
+            currentInput = String(isNaN(result) ? '错误' : Number(result.toFixed(10)));
+            previousInput = '';
+            operator = null;
+            calculated = true;
+            updateDisplay();
+
+            // 阶段一：第一次按等号，进入魔术待设定阶段
+            if (currentStage === 1) {
+                const resultNum = parseFloat(currentInput);
+                if (!isNaN(resultNum)) {
+                    stage1Result = resultNum;
+                    currentStage = 2;
+                }
+            }
+        }
+
+        // 清屏逻辑（核心魔术触发点）
+        function clearAll() {
+            // 界面清屏
+            currentInput = '0';
+            previousInput = '';
+            operator = null;
+            calculated = false;
+            updateDisplay();
+
+            // 阶段二：触发魔术设定
+            if (currentStage === 2) {
+                // 生成7位魔术数字：月(1位)+日(2位)+时(2位)+分(2位)
+                const now = new Date();
+                const month = now.getMonth() + 1;
+                const day = String(now.getDate()).padStart(2, '0');
+                const hour = String(now.getHours()).padStart(2, '0');
+                const minute = String(now.getMinutes()).padStart(2, '0');
+                const magicNumber = Number(`${month}${day}${hour}${minute}`);
+                
+                // 计算差值并存储
+                magicDiff = magicNumber - stage1Result;
+                currentDigitIndex = 0;
+                // 进入魔术展示阶段
+                currentStage = 3;
+            } 
+            // 阶段三/四：重置所有状态，回到初始阶段
+            else if (currentStage === 3 || currentStage === 4) {
+                currentStage = 1;
+                stage1Result = 0;
+                magicDiff = 0;
+                currentDigitIndex = 0;
+            }
+        }
+
+        // 回退键处理
+        function backspace() {
+            if (currentStage === 3 || currentStage === 4) return;
+            if (currentInput.length === 1 || currentInput === '错误') {
+                currentInput = '0';
+            } else {
+                currentInput = currentInput.slice(0, -1);
+            }
+            updateDisplay();
+        }
+
+        // 正负号切换
+        function toggleSign() {
+            if (currentStage === 3 || currentStage === 4) return;
+            if (currentInput === '0' || currentInput === '错误') return;
+            currentInput = String(parseFloat(currentInput) * -1);
+            updateDisplay();
+        }
+
+        // 全局点击监听（魔术展示核心逻辑）
+        document.addEventListener('click', (e) => {
+            // 仅阶段三生效，排除清屏键点击
+            if (currentStage !== 3 || e.target.closest('#clear-btn')) return;
+            
+            const diffStr = String(magicDiff);
+            if (currentDigitIndex < diffStr.length) {
+                // 逐位显示魔术差值
+                currentInput = diffStr.slice(0, currentDigitIndex + 1);
+                currentDigitIndex++;
+                updateDisplay();
+
+                // 全部位数显示完成，进入锁定阶段
+                if (currentDigitIndex >= diffStr.length) {
+                    currentStage = 4;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
