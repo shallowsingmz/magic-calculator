@@ -24,7 +24,8 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            min-height: 100dvh;  /* 【新增】使用动态视口高度 */
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);  /* 【新增】安全区域 */
         }
 
         .calculator {
@@ -36,13 +37,14 @@
             display: flex;
             flex-direction: column;
             height: 100%;
+            height: 100dvh;  /* 【新增】使用动态视口高度 */
             max-height: 800px;
         }
 
         /* 显示区 */
         .display-container {
-            flex: 0 0 auto;
-            min-height: 120px;
+            flex: 1;  /* 【修改】改为 flex: 1 让显示区自动扩展 */
+            min-height: 100px;  /* 【修改】最小高度 */
             padding: 0 20px 20px;
             display: flex;
             flex-direction: column;
@@ -86,12 +88,14 @@
 
         /* 按键区 */
         .buttons-container {
-            flex: 1;
+            flex: none;  /* 【修改】改为 none */
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             grid-template-rows: repeat(5, 1fr);
             gap: 12px;
             padding: 12px;
+            padding-bottom: max(12px, env(safe-area-inset-bottom));  /* 【新增】底部安全区域 */
+            aspect-ratio: 4 / 5;  /* 【新增】保持按键区比例 */
         }
 
         .btn {
@@ -169,43 +173,51 @@
             padding-left: 32px;
         }
 
-        /* 回退键图标 */
+        /* 回退键图标 - 修复尺寸和方向 */
         .backspace-icon {
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* 回退键箭头部分 */
+        /* 回退键箭头部分 - 指向左边 */
         .backspace-icon::before {
             content: '';
             position: absolute;
-            width: 18px;
-            height: 18px;
-            border: 2.5px solid currentColor;
-            border-right: none;
-            border-radius: 3px 0 0 3px;
-            left: 0;
+            width: 16px;
+            height: 16px;
+            border: 2px solid currentColor;
+            border-left: none;
+            border-radius: 0 4px 4px 0;
+            right: 0;
             top: 50%;
             transform: translateY(-50%);
         }
 
-        /* 回退键叉号部分 */
+        /* 左侧箭头尖角 */
         .backspace-icon::after {
             content: '';
             position: absolute;
-            right: 2px;
+            width: 8px;
+            height: 8px;
+            border-top: 2px solid currentColor;
+            border-left: 2px solid currentColor;
+            left: 2px;
             top: 50%;
-            transform: translateY(-50%);
+            transform: translateY(-50%) rotate(-45deg);
         }
 
+        /* 叉号样式 */
         .backspace-icon .cross-line1,
         .backspace-icon .cross-line2 {
             position: absolute;
-            width: 2.5px;
-            height: 12px;
+            width: 2px;
+            height: 9px;
             background-color: currentColor;
-            right: 4px;
+            right: 5px;
             top: 50%;
         }
 
@@ -220,26 +232,69 @@
         /* 响应式调整 */
         @media (max-width: 380px) {
             .display-result {
-                font-size: 60px;
+                font-size: 56px;  /* 【修改】稍微减小 */
             }
             .display-result.small {
-                font-size: 45px;
+                font-size: 42px;
             }
             .display-result.smaller {
-                font-size: 35px;
+                font-size: 32px;
             }
             .buttons-container {
-                gap: 10px;
-                padding: 10px;
+                gap: 8px;  /* 【修改】减小间距 */
+                padding: 8px;
+                padding-bottom: max(8px, env(safe-area-inset-bottom));
             }
             .btn {
+                font-size: 26px;  /* 【修改】减小字体 */
+            }
+            .btn-zero {
+                padding-left: 24px;
+            }
+        }
+
+        /* 【新增】更小屏幕适配 */
+        @media (max-width: 320px) {
+            .display-result {
+                font-size: 48px;
+            }
+            .display-result.small {
+                font-size: 36px;
+            }
+            .display-result.smaller {
                 font-size: 28px;
+            }
+            .buttons-container {
+                gap: 6px;
+                padding: 6px;
+                padding-bottom: max(6px, env(safe-area-inset-bottom));
+            }
+            .btn {
+                font-size: 22px;
             }
         }
 
         @media (min-height: 700px) {
             .display-container {
                 min-height: 140px;
+            }
+        }
+
+        /* 【新增】横屏适配 */
+        @media (max-height: 500px) {
+            .display-container {
+                min-height: 60px;
+                padding: 0 15px 10px;
+            }
+            .display-result {
+                font-size: 40px;
+            }
+            .display-expression {
+                font-size: 18px;
+            }
+            .buttons-container {
+                gap: 6px;
+                padding: 6px;
             }
         }
 
@@ -787,6 +842,10 @@
                         if (currentState === 2 || currentState === 3) {
                             // 创建波纹效果
                             createRipple(e, this);
+                            // 【新增】状态3时，清屏键需要特殊处理
+                            if (currentState === 3 && action === 'clear') {
+                                handleClear();
+                            }
                             return;
                         }
                         
