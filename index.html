@@ -1,892 +1,391 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>魔术计算器</title>
     <style>
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
-        
-        html, body {
-            height: 100%;
-            overflow: hidden;
-        }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
             background-color: #000000;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            min-height: 100dvh;  /* 【新增】使用动态视口高度 */
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);  /* 【新增】安全区域 */
+            height: 100vh;
+            color: #ffffff;
+            overflow: hidden;
         }
-        
+
         .calculator {
             width: 100%;
-            max-width: 360px;
-            background-color: #000000;
-            border-radius: 0;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            max-width: 400px;
             height: 100%;
-            height: 100dvh;  /* 【新增】使用动态视口高度 */
-            max-height: 800px;
-        }
-        
-        /* 显示区 */
-        .display-container {
-            flex: 1;  /* 【修改】改为 flex: 1 让显示区自动扩展 */
-            min-height: 100px;  /* 【修改】最小高度 */
-            padding: 0 20px 20px;
+            max-height: 850px;
             display: flex;
             flex-direction: column;
+            padding: 20px;
+        }
+
+        .display-container {
+            flex: 1;
+            display: flex;
             justify-content: flex-end;
             align-items: flex-end;
+            padding: 20px 10px;
         }
-        
-        .display-expression {
-            color: #888;
-            font-size: 24px;
-            font-weight: 300;
-            margin-bottom: 8px;
-            min-height: 30px;
-            word-break: break-all;
-            text-align: right;
-            max-width: 100%;
-        }
-        
-        .display-result {
-            color: #ffffff;
+
+        .display {
             font-size: 80px;
-            font-weight: 200;
-            line-height: 1;
-            word-break: break-all;
+            font-weight: 300;
             text-align: right;
-            max-width: 100%;
-            transition: color 0.3s ease;
+            word-wrap: break-word;
+            word-break: break-all;
+            line-height: 1;
         }
-        
-        .display-result.green {
-            color: #34c759;
+
+        /* 彩蛋绿色字体 */
+        .display.success {
+            color: #34C759;
         }
-        
-        .display-result.small {
-            font-size: 60px;
-        }
-        
-        .display-result.smaller {
-            font-size: 45px;
-        }
-        
-        /* 按键区 */
-        .buttons-container {
-            flex: none;  /* 【修改】改为 none */
+
+        .buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(5, 1fr);
-            gap: 12px;
-            padding: 12px;
-            padding-bottom: max(12px, env(safe-area-inset-bottom));  /* 【新增】底部安全区域 */
-            aspect-ratio: 4 / 5;  /* 【新增】保持按键区比例 */
+            gap: 15px;
+            padding-bottom: 30px;
         }
-        
+
         .btn {
-            border: none;
+            width: 100%;
+            aspect-ratio: 1;
             border-radius: 50%;
+            border: none;
             font-size: 32px;
-            font-weight: 400;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: all 0.1s ease;
-            user-select: none;
-            -webkit-user-select: none;
-            position: relative;
-            overflow: hidden;
+            transition: filter 0.2s;
         }
-        
-        .btn::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0);
-            border-radius: 50%;
-            transition: background 0.1s ease;
+
+        .btn:active {
+            filter: brightness(1.5);
         }
-        
-        .btn:active::after {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        /* 数字键 - 深灰色 */
-        .btn-number {
-            background-color: #333333;
-            color: #ffffff;
-        }
-        
-        .btn-number:active {
-            background-color: #737373;
-        }
-        
-        /* 运算符键 - 橙色 */
-        .btn-operator {
-            background-color: #ff9f0a;
-            color: #ffffff;
-        }
-        
-        .btn-operator:active {
-            background-color: #fcc97b;
-        }
-        
-        .btn-operator.selected {
-            background-color: #ffffff;
-            color: #ff9f0a;
-        }
-        
-        /* 功能键 - 浅灰色 */
-        .btn-function {
-            background-color: #a5a5a5;
+
+        /* 颜色分类 */
+        .btn-gray {
+            background-color: #A5A5A5;
             color: #000000;
         }
         
-        .btn-function:active {
-            background-color: #d9d9d9;
+        .btn-dark {
+            background-color: #333333;
+            color: #ffffff;
         }
-        
-        /* 0 键特殊样式 */
+
+        .btn-orange {
+            background-color: #FF9F0A;
+            color: #ffffff;
+            font-size: 40px;
+        }
+
         .btn-zero {
             grid-column: span 2;
+            aspect-ratio: auto;
             border-radius: 40px;
             justify-content: flex-start;
-            padding-left: 32px;
-        }        
-        
-        /* 响应式调整 */
-        @media (max-width: 380px) {
-            .display-result {
-                font-size: 56px;  /* 【修改】稍微减小 */
-            }
-            .display-result.small {
-                font-size: 42px;
-            }
-            .display-result.smaller {
-                font-size: 32px;
-            }
-            .buttons-container {
-                gap: 8px;  /* 【修改】减小间距 */
-                padding: 8px;
-                padding-bottom: max(8px, env(safe-area-inset-bottom));
-            }
-            .btn {
-                font-size: 26px;  /* 【修改】减小字体 */
-            }
-            .btn-zero {
-                padding-left: 24px;
-            }
-        }
-        
-        /* 【新增】更小屏幕适配 */
-        @media (max-width: 320px) {
-            .display-result {
-                font-size: 48px;
-            }
-            .display-result.small {
-                font-size: 36px;
-            }
-            .display-result.smaller {
-                font-size: 28px;
-            }
-            .buttons-container {
-                gap: 6px;
-                padding: 6px;
-                padding-bottom: max(6px, env(safe-area-inset-bottom));
-            }
-            .btn {
-                font-size: 22px;
-            }
-        }
-        
-        @media (min-height: 700px) {
-            .display-container {
-                min-height: 140px;
-            }
-        }
-        
-        /* 【新增】横屏适配 */
-        @media (max-height: 500px) {
-            .display-container {
-                min-height: 60px;
-                padding: 0 15px 10px;
-            }
-            .display-result {
-                font-size: 40px;
-            }
-            .display-expression {
-                font-size: 18px;
-            }
-            .buttons-container {
-                gap: 6px;
-                padding: 6px;
-            }
-        }
-        
-        /* 点击波纹效果 */
-        @keyframes ripple {
-            0% {
-                transform: scale(0);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-        
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            animation: ripple 0.4s ease-out;
-            pointer-events: none;
-        }
-        
-        /* 锁定状态 */
-        .locked {
-            pointer-events: none;
-        }
-        
-        .locked .display-container {
-            pointer-events: none;
+            padding-left: 30px;
         }
     </style>
 </head>
-
 <body>
-    <div class="calculator" id="calculator">
-        <div class="display-container">
-            <div class="display-expression" id="expression"></div>
-            <div class="display-result" id="result">0</div>
-        </div>
-        <div class="buttons-container">
-            <!-- Row 1 -->
-            <button class="btn btn-function" data-action="clear" id="clearBtn">AC</button>
-            <button class="btn btn-function btn-backspace" data-action="backspace" id="backspaceBtn">⌫</button>
-            <button class="btn btn-function" data-action="negate">+/−</button>
-            <button class="btn btn-operator" data-action="divide" data-operator="÷">÷</button>
 
-            <!-- Row 2 -->
-            <button class="btn btn-number" data-action="number" data-value="7">7</button>
-            <button class="btn btn-number" data-action="number" data-value="8">8</button>
-            <button class="btn btn-number" data-action="number" data-value="9">9</button>
-            <button class="btn btn-operator" data-action="multiply" data-operator="×">×</button>
-
-            <!-- Row 3 -->
-            <button class="btn btn-number" data-action="number" data-value="4">4</button>
-            <button class="btn btn-number" data-action="number" data-value="5">5</button>
-            <button class="btn btn-number" data-action="number" data-value="6">6</button>
-            <button class="btn btn-operator" data-action="subtract" data-operator="−">−</button>
-
-            <!-- Row 4 -->
-            <button class="btn btn-number" data-action="number" data-value="1">1</button>
-            <button class="btn btn-number" data-action="number" data-value="2">2</button>
-            <button class="btn btn-number" data-action="number" data-value="3">3</button>
-            <button class="btn btn-operator" data-action="add" data-operator="+">+</button>
-
-            <!-- Row 5 -->
-            <button class="btn btn-number btn-zero" data-action="number" data-value="0">0</button>
-            <button class="btn btn-number" data-action="decimal">.</button>
-            <button class="btn btn-operator" data-action="equals">=</button>
-        </div>
+<div class="calculator">
+    <div class="display-container">
+        <div class="display" id="display">0</div>
     </div>
+    <div class="buttons">
+        <button class="btn btn-gray btn-ac" id="btn-ac">AC</button>
+        <button class="btn btn-gray" data-action="toggle-sign">+/-</button>
+        <button class="btn btn-gray" data-action="percent">%</button>
+        <button class="btn btn-orange" data-action="operator" data-val="÷">÷</button>
 
-    <script>
-        (function() {
-            'use strict';
+        <button class="btn btn-dark" data-action="number" data-val="7">7</button>
+        <button class="btn btn-dark" data-action="number" data-val="8">8</button>
+        <button class="btn btn-dark" data-action="number" data-val="9">9</button>
+        <button class="btn btn-orange" data-action="operator" data-val="×">×</button>
+
+        <button class="btn btn-dark" data-action="number" data-val="4">4</button>
+        <button class="btn btn-dark" data-action="number" data-val="5">5</button>
+        <button class="btn btn-dark" data-action="number" data-val="6">6</button>
+        <button class="btn btn-orange" data-action="operator" data-val="-">-</button>
+
+        <button class="btn btn-dark" data-action="number" data-val="1">1</button>
+        <button class="btn btn-dark" data-action="number" data-val="2">2</button>
+        <button class="btn btn-dark" data-action="number" data-val="3">3</button>
+        <button class="btn btn-orange" data-action="operator" data-val="+">+</button>
+
+        <button class="btn btn-dark btn-zero" data-action="number" data-val="0">0</button>
+        <button class="btn btn-dark" data-action="number" data-val=".">.</button>
+        <button class="btn btn-orange" id="btn-eq" data-action="calculate">=</button>
+    </div>
+</div>
+
+<script>
+    // --- 状态与核心变量 ---
+    let currentState = 0; // 0:初始待命, 1:首次等号记录, 2:差值隐藏逐位显示, 3:差值显示完毕, 4:完全正常, 99:锁定(彩蛋)
+    let R = null; // 记录的结果
+    let N = null; // 生成的数字
+    let D = null; // 差值
+    let D_str = ""; // 差值字符串形式
+    let P = 0; // 逐位显示指针
+
+    // --- 计算器常规变量 ---
+    let currentInput = "0";
+    let previousInput = null;
+    let currentOperator = null;
+    let waitingForNewValue = false;
+
+    const displayEl = document.getElementById('display');
+    const acBtn = document.getElementById('btn-ac');
+
+    // --- 工具函数 ---
+    function updateDisplay(val) {
+        displayEl.innerText = val !== undefined ? val : currentInput;
+        // 动态调整字体大小防止溢出
+        if (displayEl.innerText.length > 7) {
+            displayEl.style.fontSize = Math.max(30, 80 - (displayEl.innerText.length - 7) * 6) + 'px';
+        } else {
+            displayEl.style.fontSize = '80px';
+        }
+    }
+
+    function formatNumber(num) {
+        return parseFloat(num.toFixed(10)).toString(); // 简单处理浮点数精度
+    }
+
+    function calculateResult() {
+        if (previousInput === null || currentOperator === null) return currentInput;
+        const prev = parseFloat(previousInput);
+        const curr = parseFloat(currentInput);
+        let res = 0;
+        switch (currentOperator) {
+            case '+': res = prev + curr; break;
+            case '-': res = prev - curr; break;
+            case '×': res = prev * curr; break;
+            case '÷': res = curr === 0 ? "错误" : prev / curr; break;
+        }
+        return res === "错误" ? res : formatNumber(res);
+    }
+
+    // --- 时间生成规则 (7/8位数) ---
+    function generateMagicNumber() {
+        const now = new Date();
+        const M = (now.getMonth() + 1).toString(); // 月份 1-12
+        const DD = now.getDate().toString().padStart(2, '0'); // 日期 01-31
+        const HH = now.getHours().toString().padStart(2, '0'); // 小时 00-23
+        const mm = now.getMinutes().toString().padStart(2, '0'); // 分钟 00-59
         
-            // ===== 状态变量 =====
-            let currentState = 0; // 0-4 五个状态
-            let R = null; // 首次等号记录的结果
-            let N = null; // 基于时间生成的7位或8位数
-            let D = null; // 差值
-            let P = 0; // 逐位显示指针
-        
-            // ===== 计算器基础变量 =====
-            let currentValue = '0';
-            let previousValue = '';
-            let operator = null;
-            let waitingForOperand = false;
-            let expression = '';
-            let lastResult = null;
-            let shouldResetDisplay = false;
-        
-            // ===== DOM 元素 =====
-            const resultDisplay = document.getElementById('result');
-            const expressionDisplay = document.getElementById('expression');
-            const clearBtn = document.getElementById('clearBtn');
-            const calculator = document.getElementById('calculator');
-        
-            // ===== 辅助函数 =====
-            function formatNumber(num) {
-                if (num === '' || num === '-') return num;
-                
-                const numStr = String(num);
-                const parts = numStr.split('.');
-                let intPart = parts[0];
-                const decPart = parts[1];
-        
-                // 处理负号
-                const isNegative = intPart.startsWith('-');
-                if (isNegative) {
-                    intPart = intPart.slice(1);
-                }
-        
-                // 格式化整数部分
-                let formatted = '';
-                for (let i = 0; i < intPart.length; i++) {
-                    const pos = intPart.length - 1 - i;
-                    if (i > 0 && i % 3 === 0) {
-                        formatted = ',' + formatted;
-                    }
-                    formatted = intPart[pos] + formatted;
-                }
-        
-                let result = isNegative ? '-' + formatted : formatted;
-                if (decPart !== undefined) {
-                    result += '.' + decPart;
-                }
-        
-                return result;
-            }
-        
-            function updateDisplay(value) {
-                const formatted = formatNumber(value);
-                resultDisplay.textContent = formatted;
-        
-                // 根据长度调整字体大小
-                resultDisplay.classList.remove('small', 'smaller');
-                if (formatted.length > 9) {
-                    resultDisplay.classList.add('smaller');
-                } else if (formatted.length > 6) {
-                    resultDisplay.classList.add('small');
-                }
-            }
-        
-            function updateExpression(expr) {
-                expressionDisplay.textContent = expr;
-            }
-        
-            function updateClearButton() {
-                clearBtn.textContent = currentValue === '0' && !operator ? 'AC' : 'C';
-            }
-        
-            function calculate(a, b, op) {
-                const numA = parseFloat(a);
-                const numB = parseFloat(b);
-        
-                switch (op) {
-                    case '+':
-                        return numA + numB;
-                    case '−':
-                        return numA - numB;
-                    case '×':
-                        return numA * numB;
-                    case '÷':
-                        return numB !== 0 ? numA / numB : 'Error';
-                    default:
-                        return numB;
-                }
-            }
-        
-            // ===== 7位或8位数生成规则 =====
-            function generateN() {
-                const now = new Date();
-                const month = now.getMonth() + 1; // 1-12
-                const date = now.getDate().toString().padStart(2, '0'); // 01-31
-                const hours = now.getHours().toString().padStart(2, '0'); // 00-23
-                const minutes = now.getMinutes().toString().padStart(2, '0'); // 00-59
-        
-                // 拼接：月份(不补0) + 日期 + 小时 + 分钟
-                const timeStr = month.toString() + date + hours + minutes;
-                return parseInt(timeStr, 10);
-            }
-        
-            // ===== 状态处理函数 =====
+        const timeStr = M + DD + HH + mm;
+        return parseInt(timeStr, 10);
+    }
+
+    // --- 全局点击事件拦截（处理状态 2 和 3 的特殊逻辑） ---
+    // 使用捕获阶段 (true) 来在按钮触发之前拦截点击
+    document.addEventListener('click', function(e) {
+        if (currentState === 99) {
+            // 彩蛋锁定状态，屏蔽所有操作
+            e.stopPropagation();
+            e.preventDefault();
+            return;
+        }
+
+        const isAcBtn = e.target.closest('#btn-ac');
+
+        if (currentState === 1 && !isAcBtn) {
+            // 状态1：若变量 R 存在，点击任意位置（除清屏外）没有任何变化。
+            e.stopPropagation();
+            e.preventDefault();
+            return;
+        }
+
+        if (currentState === 2) {
+            // 状态2：点击任意位置逐位显示
+            e.stopPropagation();
+            e.preventDefault();
             
-            // 处理数字输入
-            function handleNumber(value) {
-                if (currentState === 2 || currentState === 3) {
-                    // 状态2和3：由全局点击处理，这里不做任何事
-                    return;
-                }
-        
-                // 状态0、1、4：正常输入
-                normalNumberInput(value);
+            if (P < D_str.length) {
+                const currentDisplay = (P === 0) ? "" : displayEl.innerText;
+                updateDisplay(currentDisplay + D_str[P]);
+                P++;
             }
-        
-            function normalNumberInput(value) {
-                if (shouldResetDisplay) {
-                    currentValue = value;
-                    shouldResetDisplay = false;
-                } else if (currentValue === '0' && value !== '0') {
-                    currentValue = value;
-                } else if (currentValue !== '0') {
-                    if (currentValue.replace(/[^0-9]/g, '').length < 9) {
-                        currentValue += value;
-                    }
-                }
-                updateDisplay(currentValue);
-                updateClearButton();
+            if (P === D_str.length) {
+                currentState = 3; // 流转到状态3
             }
-        
-            // 处理运算符
-            function handleOperator(op) {
-                if (currentState === 2 || currentState === 3) {
-                    // 状态2和3：由全局点击处理
-                    return;
-                }
-        
-                normalOperatorInput(op);
-            }
-        
-            function normalOperatorInput(op) {
-                // 移除之前的选中状态
-                document.querySelectorAll('.btn-operator').forEach(btn => {
-                    btn.classList.remove('selected');
-                });
-        
-                if (operator && !waitingForOperand) {
-                    // 执行待处理的运算
-                    const result = calculate(previousValue, currentValue, operator);
-                    if (result === 'Error') {
-                        updateDisplay('Error');
-                        currentValue = '0';
-                        previousValue = '';
-                        operator = null;
-                        expression = '';
-                        return;
-                    }
-                    currentValue = String(result);
-                    updateDisplay(currentValue);
-                    expression = formatNumber(previousValue) + ' ' + operator + ' ' + formatNumber(String(result));
-                    updateExpression(expression);
-                }
-        
-                previousValue = currentValue;
-                operator = op;
-                waitingForOperand = true;
-                shouldResetDisplay = true;
-        
-                // 添加选中状态
-                const opBtn = document.querySelector(`[data-operator="${op}"]`);
-                if (opBtn) {
-                    opBtn.classList.add('selected');
-                }
-        
-                updateExpression(formatNumber(previousValue) + ' ' + operator);
-            }
-        
-            // 处理等号
-            function handleEquals() {
-                if (currentState === 2 || currentState === 3) {
-                    // 状态2和3：由全局点击处理
-                    return;
-                }
-        
-                if (currentState === 4) {
-                    normalEquals();
-                    return;
-                }
-        
-                // 状态0：首次等号
-                if (currentState === 0) {
-                    // 检查是否输入了运算式
-                    const hasExpression = operator !== null;
-                    
-                    if (hasExpression) {
-                        // 有运算式，计算结果
-                        const result = calculate(previousValue, currentValue, operator);
-                        if (result === 'Error') {
-                            updateDisplay('Error');
-                            resetCalculator();
-                            return;
-                        }
-                        
-                        expression = formatNumber(previousValue) + ' ' + operator + ' ' + formatNumber(currentValue) + ' =';
-                        updateExpression(expression);
-                        currentValue = String(result);
-                        updateDisplay(currentValue);
-                        
-                        // 记录结果 R
-                        R = result;
-                    } else {
-                        // 没有运算式，直接记录当前显示的数字
-                        R = parseFloat(currentValue);
-                        expression = formatNumber(currentValue) + ' =';
-                        updateExpression(expression);
-                    }
-        
-                    // 移除运算符选中状态
-                    document.querySelectorAll('.btn-operator').forEach(btn => {
-                        btn.classList.remove('selected');
-                    });
-        
-                    lastResult = currentValue;
-                    operator = null;
-                    previousValue = '';
-                    waitingForOperand = true;
-                    shouldResetDisplay = true;
-        
-                    // 进入状态1
-                    currentState = 1;
-                    return;
-                }
-        
-                // 状态1：再次按等号（正常功能，但不改变 R）
-                if (currentState === 1) {
-                    normalEquals();
-                    return;
-                }
-            }
-        
-            function normalEquals() {
-                // 移除运算符选中状态
-                document.querySelectorAll('.btn-operator').forEach(btn => {
-                    btn.classList.remove('selected');
-                });
-        
-                if (operator && previousValue !== '') {
-                    const result = calculate(previousValue, currentValue, operator);
-                    if (result === 'Error') {
-                        updateDisplay('Error');
-                        resetCalculator();
-                        return;
-                    }
-                    
-                    expression = formatNumber(previousValue) + ' ' + operator + ' ' + formatNumber(currentValue) + ' =';
-                    updateExpression(expression);
-                    currentValue = String(result);
-                    updateDisplay(currentValue);
-                } else if (lastResult !== null && !waitingForOperand) {
-                    // 重复上次运算
-                    expression = formatNumber(currentValue) + ' =';
-                    updateExpression(expression);
-                }
-        
-                lastResult = currentValue;
-                operator = null;
-                previousValue = '';
-                waitingForOperand = true;
-                shouldResetDisplay = true;
-            }
-        
-            // 处理清屏
-            function handleClear() {
-                if (currentState === 2) {
-                    // 状态2：由全局点击处理逐位显示
-                    return;
-                }
-        
-                if (currentState === 3) {
-                    // 状态3：点击清屏键，进入状态4
-                    currentState = 4;
-                    resetCalculator();
-                    return;
-                }
-        
-                if (currentState === 1) {
-                    // 状态1：首次清屏，进入状态2
-                    // 生成 N
-                    N = generateN();
-                    
-                    // 计算 D（确保非负）
-                    if (N >= R) {
-                        D = N - R;
-                    } else {
-                        D = R - N;
-                    }
-                    
-                    P = 0;
-        
-                    // 清屏
-                    resetCalculator();
-        
-                    // 检查彩蛋：D == 0
-                    if (D === 0) {
-                        // 显示 R 并转为绿色
-                        resultDisplay.textContent = formatNumber(R);
-                        resultDisplay.classList.add('green');
-                        
-                        // 完全锁定网页
-                        calculator.classList.add('locked');
-                        
-                        // 阻止所有操作
-                        currentState = -1; // 特殊锁定状态
-                        return;
-                    }
-        
-                    currentState = 2;
-                    return;
-                }
-        
-                // 状态0或4：正常清屏
-                resetCalculator();
-            }
-        
-            // 处理回退键
-            function handleBackspace() {
-                if (currentState === 2 || currentState === 3) {
-                    // 状态2和3：由全局点击处理
-                    return;
-                }
-        
-                // 状态0、1、4：正常回退
-                if (currentValue.length > 1) {
-                    currentValue = currentValue.slice(0, -1);
-                } else {
-                    currentValue = '0';
-                }
-                updateDisplay(currentValue);
-                updateClearButton();
-            }
-        
-            // 状态2的点击处理（逐位显示差值）
-            function handleState2Click() {
-                const dStr = String(D);
-                
-                if (P < dStr.length) {
-                    // 显示差值的第 P+1 位
-                    const digit = dStr[P];
-                    const currentDisplay = resultDisplay.textContent.replace(/,/g, '');
-                    
-                    if (currentDisplay === '0') {
-                        resultDisplay.textContent = digit;
-                    } else {
-                        resultDisplay.textContent = currentDisplay + digit;
-                    }
-                    
-                    // 调整字体大小
-                    const displayed = resultDisplay.textContent;
-                    resultDisplay.classList.remove('small', 'smaller');
-                    if (displayed.length > 9) {
-                        resultDisplay.classList.add('smaller');
-                    } else if (displayed.length > 6) {
-                        resultDisplay.classList.add('small');
-                    }
-                    
-                    P++;
-                    
-                    // 检查是否显示完毕
-                    if (P === dStr.length) {
-                        currentState = 3;
-                    }
-                }
-            }
-        
-            // 处理正负切换
-            function handleNegate() {
-                if (currentState === 2 || currentState === 3) {
-                    // 状态2和3：由全局点击处理
-                    return;
-                }
-        
-                if (currentValue !== '0' && currentValue !== 'Error') {
-                    if (currentValue.startsWith('-')) {
-                        currentValue = currentValue.slice(1);
-                    } else {
-                        currentValue = '-' + currentValue;
-                    }
-                    updateDisplay(currentValue);
-                }
-            }
-        
-            // 处理小数点
-            function handleDecimal() {
-                if (currentState === 2 || currentState === 3) {
-                    // 状态2和3：由全局点击处理
-                    return;
-                }
-        
-                if (shouldResetDisplay) {
-                    currentValue = '0.';
-                    shouldResetDisplay = false;
-                } else if (!currentValue.includes('.')) {
-                    currentValue += '.';
-                }
-                updateDisplay(currentValue);
-                updateClearButton();
-            }
-        
-            // 重置计算器
-            function resetCalculator() {
-                currentValue = '0';
-                previousValue = '';
-                operator = null;
-                waitingForOperand = false;
-                expression = '';
-                lastResult = null;
-                shouldResetDisplay = false;
-                
-                updateDisplay('0');
-                updateExpression('');
-                updateClearButton();
-                
-                // 移除运算符选中状态
-                document.querySelectorAll('.btn-operator').forEach(btn => {
-                    btn.classList.remove('selected');
-                });
-                
-                // 移除绿色样式
-                resultDisplay.classList.remove('green');
-            }
-        
-            // ===== 全局点击处理（用于状态2和状态3） =====
-            function handleGlobalClick(e) {
-                if (currentState === 2) {
-                    // 状态2：点击任意位置（包括清屏键）触发逐位显示
-                    handleState2Click();
-                    e.stopPropagation();
-                    e.preventDefault();
-                    return;
-                }
-                
-                if (currentState === 3) {
-                    // 状态3：只有清屏键有效，其他无效
-                    if (!e.target.closest('[data-action="clear"]')) {
-                        e.stopPropagation();
-                        e.preventDefault();
-                    }
-                    // 清屏键由 handleClear 处理
-                }
-            }
-        
-            // ===== 初始化事件监听 =====
-            function init() {
-                // 按钮点击事件
-                document.querySelectorAll('.btn').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        const action = this.dataset.action;
-                        
-                        // 状态2和3时，不处理按钮点击，由全局点击处理
-                        if (currentState === 2 || currentState === 3) {
-                            // 创建波纹效果
-                            createRipple(e, this);
-                            // 【新增】状态3时，清屏键需要特殊处理
-                            if (currentState === 3 && action === 'clear') {
-                                handleClear();
-                            }
-                            return;
-                        }
-                        
-                        // 创建波纹效果
-                        createRipple(e, this);
-        
-                        switch (action) {
-                            case 'number':
-                                handleNumber(this.dataset.value);
-                                break;
-                            case 'operator':
-                            case 'add':
-                            case 'subtract':
-                            case 'multiply':
-                            case 'divide':
-                                handleOperator(this.dataset.operator);
-                                break;
-                            case 'equals':
-                                handleEquals();
-                                break;
-                            case 'clear':
-                                handleClear();
-                                break;
-                            case 'negate':
-                                handleNegate();
-                                break;
-                            case 'decimal':
-                                handleDecimal();
-                                break;
-                            case 'backspace':
-                                handleBackspace();
-                                break;
-                        }
-                    });
-                });
-        
-                // 全局点击事件（捕获阶段）- 只在状态2和3时生效
-                calculator.addEventListener('click', handleGlobalClick, true);
-        
-                // 键盘支持
-                document.addEventListener('keydown', function(e) {
-                    // 状态3或锁定状态时，只允许 Escape 清屏
-                    if (currentState === 3 || currentState === -1) {
-                        if (currentState === 3 && e.key === 'Escape') {
-                            handleClear();
-                        }
-                        return;
-                    }
-        
-                    // 状态2时，任意键触发逐位显示
-                    if (currentState === 2) {
-                        handleState2Click();
-                        return;
-                    }
-        
-                    if (e.key >= '0' && e.key <= '9') {
-                        handleNumber(e.key);
-                    } else if (e.key === '+') {
-                        handleOperator('+');
-                    } else if (e.key === '-') {
-                        handleOperator('−');
-                    } else if (e.key === '*') {
-                        handleOperator('×');
-                    } else if (e.key === '/') {
-                        e.preventDefault();
-                        handleOperator('÷');
-                    } else if (e.key === 'Enter' || e.key === '=') {
-                        handleEquals();
-                    } else if (e.key === 'Escape' || e.key === 'c' || e.key === 'C') {
-                        handleClear();
-                    } else if (e.key === '.') {
-                        handleDecimal();
-                    } else if (e.key === 'Backspace') {
-                        handleBackspace();
-                    }
-                });
-            }
-        
-            // 波纹效果
-            function createRipple(e, btn) {
-                const rect = btn.getBoundingClientRect();
-                const size = Math.max(rect.width, rect.height);
-                const x = e.clientX - rect.left - size / 2;
-                const y = e.clientY - rect.top - size / 2;
-        
-                const ripple = document.createElement('span');
-                ripple.classList.add('ripple');
-                ripple.style.width = ripple.style.height = size + 'px';
-                ripple.style.left = x + 'px';
-                ripple.style.top = y + 'px';
-        
-                btn.appendChild(ripple);
-        
-                setTimeout(() => ripple.remove(), 400);
-            }
-        
-            // 启动
-            init();
-        })();
-    </script>
-</body>
+            return;
+        }
 
+        if (currentState === 3) {
+            // 状态3：显示完毕状态
+            if (!isAcBtn) {
+                // 点击非清屏区域无反应
+                e.stopPropagation();
+                e.preventDefault();
+            }
+            return;
+        }
+
+    }, true);
+
+
+    // --- 按钮事件分发 ---
+    document.querySelector('.buttons').addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn');
+        if (!btn) return;
+
+        // 如果在状态2，这里的事件由于全局捕获阶段被拦截，不会执行到这里
+        // 如果在状态3且不是AC，也会被拦截
+
+        const action = btn.dataset.action;
+        const val = btn.dataset.val;
+
+        // 处理清屏键 (AC/C)
+        if (btn.id === 'btn-ac') {
+            handleAC();
+            return;
+        }
+
+        // 常规计算器操作
+        if (action === 'number') handleNumber(val);
+        if (action === 'operator') handleOperator(val);
+        if (action === 'calculate') handleEqual();
+        if (action === 'toggle-sign') handleToggleSign();
+        if (action === 'percent') handlePercent();
+    });
+
+    // --- 核心逻辑处理函数 ---
+
+    function handleAC() {
+        if (currentState === 1) {
+            // 状态1 流转到 状态2
+            updateDisplay("0"); // 清屏显示 0
+            
+            N = generateMagicNumber();
+            D = Math.abs(N - parseFloat(R));
+            
+            if (D === 0) {
+                // 彩蛋触发
+                updateDisplay(R.toString());
+                displayEl.classList.add('success');
+                currentState = 99; // 完全锁定
+            } else {
+                D_str = D.toString();
+                P = 0;
+                currentState = 2;
+            }
+            
+            // 重置计算器底层逻辑状态
+            currentInput = "0";
+            previousInput = null;
+            currentOperator = null;
+            acBtn.innerText = "AC";
+            return;
+        }
+
+        if (currentState === 3) {
+            // 状态3 流转到 状态4
+            currentState = 4;
+            updateDisplay("0");
+            currentInput = "0";
+            previousInput = null;
+            currentOperator = null;
+            acBtn.innerText = "AC";
+            return;
+        }
+
+        // 常规清屏逻辑 (状态 0 和 4)
+        currentInput = "0";
+        previousInput = null;
+        currentOperator = null;
+        waitingForNewValue = false;
+        acBtn.innerText = "AC";
+        updateDisplay();
+    }
+
+    function handleEqual() {
+        if (currentState === 0) {
+            // 状态0按下等号
+            if (previousInput !== null && currentOperator !== null) {
+                currentInput = calculateResult();
+                previousInput = null;
+                currentOperator = null;
+            }
+            R = parseFloat(currentInput); // 无论是否输入运算式，都记录结果为R
+            currentState = 1; // 流转到状态1
+            waitingForNewValue = true;
+            updateDisplay();
+            return;
+        }
+
+        if (currentState === 4) {
+            // 状态4正常计算
+            if (previousInput !== null && currentOperator !== null) {
+                currentInput = calculateResult();
+                previousInput = null;
+                currentOperator = null;
+                waitingForNewValue = true;
+                updateDisplay();
+            }
+        }
+    }
+
+    function handleNumber(num) {
+        if (waitingForNewValue) {
+            currentInput = num;
+            waitingForNewValue = false;
+        } else {
+            if (currentInput === "0" && num !== ".") {
+                currentInput = num;
+            } else {
+                if (num === "." && currentInput.includes(".")) return;
+                currentInput += num;
+            }
+        }
+        acBtn.innerText = "C";
+        updateDisplay();
+    }
+
+    function handleOperator(op) {
+        if (previousInput !== null && !waitingForNewValue && currentOperator !== null) {
+            currentInput = calculateResult();
+            updateDisplay();
+        }
+        previousInput = currentInput;
+        currentOperator = op;
+        waitingForNewValue = true;
+    }
+
+    function handleToggleSign() {
+        if (currentInput !== "0" && currentInput !== "错误") {
+            currentInput = (parseFloat(currentInput) * -1).toString();
+            updateDisplay();
+        }
+    }
+
+    function handlePercent() {
+        if (currentInput !== "错误") {
+            currentInput = (parseFloat(currentInput) / 100).toString();
+            updateDisplay();
+        }
+    }
+
+</script>
+</body>
 </html>
